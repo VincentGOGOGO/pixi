@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>game</title>
+    <script src="js/pixi.min.js"></script>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+    
+    html,
+    body {
+        height: 100%;
+    }
+    </style>
+</head>
+
+<body>
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', start, false);
+
+var w = document.body.clientWidth;
+var h = document.body.clientHeight;
+
+
+var starCount = 800;
+
+var slideX = w / 2;
+var slideY = h / 2;
+var stars = [];
+
+
+Vector2 = function(x, y) {
+    this.x = x;
+    this.y = y;
+};
+
+Vector2.prototype = {
+    copy: function() {
+        return new Vector2(this.x, this.y);
+    },
+    length: function() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    },
+    sqrLength: function() {
+        return this.x * this.x + this.y * this.y;
+    },
+    normalize: function() {
+        var inv = 1 / this.length();
+        return new Vector2(this.x * inv, this.y * inv);
+    },
+    negate: function() {
+        return new Vector2(-this.x, -this.y);
+    },
+    add: function(v) {
+        return new Vector2(this.x + v.x, this.y + v.y);
+    },
+    subtract: function(v) {
+        return new Vector2(this.x - v.x, this.y - v.y);
+    },
+    multiply: function(f) {
+        return new Vector2(this.x * f, this.y * f);
+    },
+    divide: function(f) {
+        var invf = 1 / f;
+        return new Vector2(this.x * invf, this.y * invf);
+    },
+    dot: function(v) {
+        return this.x * v.x + this.y * v.y;
+    }
+};
+
+Vector2.zero = new Vector2(0, 0);
+
+
+
+
+var acceleration = new Vector2(0, 10);
+var dt = 0.03;
+
+var vx = 0;
+var vy = 50;
+
+var oldmousex = 0;
+var oldmousey = 0;
+
+document.onmousemove = function(e) {
+    slideX = e.clientX;
+    slideY = e.clientY;
+}
+
+document.addEventListener("touchmove",function(e){
+	slideX = parseInt(e.touches[0].clientX);
+    slideY = parseInt(e.touches[0].clientY);
+})
+
+setInterval(function(){
+	slideX=rand(0,w);
+	slideY=rand(0,h/3);
+},1000);
+
+
+
+function rand(n, m) {
+    return parseInt(Math.random() * (m - n) + n);
+}
+
+function start() {
+
+
+
+    renderer = PIXI.autoDetectRenderer(w, h, {
+        preserveDrawingBuffer: true
+    });
+
+
+
+    stage = new PIXI.Container();
+
+
+    document.body.appendChild(renderer.view);
+
+
+    aaa = new PIXI.Graphics();
+    aaa.lineStyle(0);
+    aaa.beginFill(0x000000, .1);
+    aaa.drawRect(0, 0, w, h)
+    aaa.endFill();
+
+    for (var i = 0; i < starCount; i++) {
+        (function(i) {
+            setTimeout(function() {
+                var ddd = PIXI.utils.rgb2hex([rand(0, 250), 123, 121])
+                var tempBall = new PIXI.Graphics();
+                tempBall.lineStyle(0);
+                tempBall.beginFill(ddd);
+                tempBall.drawCircle(0, 0, 1);
+                tempBall.endFill();
+
+
+
+            
+tempBall.alpha = parseInt(Math.random() * 100) / 100;
+                var position = new Vector2(slideX, slideY);
+                var velocity = new Vector2(/*slideX - oldmousex +*/ rand(-50, 50), /*slideY - oldmousey + */rand(-50, 50));
+
+                stars.push({
+                    sprite: tempBall,
+                    position: position,
+                    velocity: velocity,
+                    sx: 19.5 / 20 + (Math.random() / 20),
+                    sy: 19.5 / 20 + (Math.random() / 20),
+                    alpha: tempBall.alpha
+                });
+
+
+
+                stage.addChild(tempBall);
+            }, i)
+        })(i)
+    }
+
+
+
+    requestAnimationFrame(update);
+
+}
+
+
+
+
+
+function update() {
+
+    stage.addChild(aaa)
+
+    renderer.clearBeforeRender = false;
+
+    for (var i = 0; i < starCount; i++) {
+        if (!stars[i]) {
+            break;
+        }
+        stars[i].position = stars[i].position.add(stars[i].velocity.multiply(dt));
+        stars[i].velocity = stars[i].velocity.add(acceleration.multiply(dt));
+        stars[i].sprite.position.x = stars[i].position.x;
+        stars[i].sprite.position.y = stars[i].position.y;
+        stars[i].sprite.alpha = stars[i].alpha;
+
+        stars[i].alpha -= 0.005;
+
+        if (stars[i].alpha < .1) {
+            stars[i].alpha = 1;
+            stars[i].position = new Vector2(slideX, slideY);
+            stars[i].velocity = new Vector2(/*slideX - oldmousex +*/ rand(-50, 50), /*slideY - oldmousey + */rand(-50, 50));
+
+        }
+
+
+        if (stars[i].position.x < 0 || stars[i].position.x > w)
+            stars[i].velocity.x = -stars[i].velocity.x;
+
+        if (stars[i].position.y < 0 || stars[i].position.y > h)
+            stars[i].velocity.y = -stars[i].velocity.y;
+    }
+
+      oldmousex = slideX;
+    oldmousey = slideY;
+
+
+
+
+    renderer.render(stage, null, false);
+
+    requestAnimationFrame(update);
+}
+</script>
+
+</html>

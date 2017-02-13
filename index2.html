@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>game</title>
+    <script src="js/pixi.min.js"></script>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+    </style>
+</head>
+
+<body>
+</body>
+<script>
+var renderer = PIXI.autoDetectRenderer(800, 600, {
+    preserveDrawingBuffer:true
+});
+document.body.appendChild(renderer.view);
+
+var stage = new PIXI.Container();
+
+var texture = PIXI.Texture.fromImage('images/1.png');
+
+var bunny = new PIXI.Sprite(texture);
+
+var container = new PIXI.particles.ParticleContainer();
+stage.addChild(container);
+var w = 800;
+var h = 600;
+var starCount = 50;
+
+var slideX = w / 2;
+var slideY = h / 2;
+var sprites = [];
+
+for (var i = 0; i < starCount; ++i) {
+    var sprite = new PIXI.Sprite(texture);
+    sprite.position.y = 10 * i;
+    container.addChild(sprite);
+    sprites.push({
+        sprite: sprite,
+        x: sprite.x,
+        y: sprite.y,
+        sx: 0.975 + (Math.random() / 20),
+        sy: 0.975 + (Math.random() / 20),
+        alpha: sprite.alpha
+    })
+
+
+}
+
+
+
+
+requestAnimationFrame(update);
+
+function update() {
+
+
+container.alpha=.5;
+    for (var i = 0; i < starCount; i++) {
+    	if(!sprites[i]){
+    		break;
+    	}
+        sprites[i].sprite.position.x = sprites[i].x;
+        sprites[i].sprite.position.y = sprites[i].y;
+        sprites[i].sprite.alpha = sprites[i].alpha;
+        sprites[i].x = sprites[i].x * sprites[i].sx;
+        sprites[i].y = sprites[i].y * sprites[i].sy;
+        sprites[i].alpha -= 0.02;
+
+        if (sprites[i].alpha < .1) {
+            sprites[i].x = slideX;
+            sprites[i].y = slideY;
+            sprites[i].alpha = 1;
+
+        }
+    }
+
+        var aaa=new PIXI.Transform()
+
+
+    renderer.render(stage,null,false);
+
+    requestAnimationFrame(update);
+}
+</script>
+
+</html>
